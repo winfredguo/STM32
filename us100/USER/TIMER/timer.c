@@ -5,9 +5,12 @@
 
 /****************************************************************************
 * Ãû    ³Æ: TIM_Cap_Init(u32 arr,u16 psc)
-* ¹¦    ÄÜ £º¶¨Ê±Æ÷5Í¨µÀ1ÊäÈë²¶»ñÅäÖÃ   TIM1????
-						TIM5 CH1~CH4¶ÔÓ¦Òý½Å£ºPA0,PA1,PA2,PA3
+* ¹¦    ÄÜ £º5Â· ²¶»ñÅäÖÃ 
+						TIM5 CH1~CH4¶ÔÓ¦Òý½Å£ºPA0,PA2,PA3
 						TIM9 CH1~CH2¶ÔÓ¦Òý½Å: PE5,PE6
+						
+						TIM2 CH1~Ch4¶ÔÓ¦Òý½Å£ºPA15,PB3£¬PB10,PB11
+						×¢£ºTIM5µÄCH2±»Õ¼ÓÃ£¬´ò¿ªºóÆµ·±½øÈëÖÐ¶Ï£¬¹Ê²»ÓÃ
 						1#US100
 						
 * Èë¿Ú²ÎÊý£ºarr£º×Ô¶¯ÖØ×°Öµ(TIM2,TIM5ÊÇ32Î»µÄ!!)
@@ -22,11 +25,12 @@ int status;
 
 
 TIM_CAPTURE TIM5CH1,TIM5CH2,TIM5CH3,TIM5CH4;
-TIM_CAPTURE TIM9CH1,TIM9CH2;
+//TIM_CAPTURE TIM9CH1,TIM9CH2;
+TIM_CAPTURE TIM2CH1,TIM2CH2,TIM2CH3,TIM2CH4;
 
-extern void uart1SendChars(u8 *str, u16 strlen);
+//extern void uart1SendChars(u8 *str, u16 strlen);
 
-TIM_ICInitTypeDef  TIM5_ICInitStructure,TIM9_ICInitStructure;
+TIM_ICInitTypeDef  TIM5_ICInitStructure,TIM2_ICInitStructure;
 
 
 
@@ -46,12 +50,12 @@ void TIM_Cap_Init(u32 arr,u16 psc)
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority =0;		//×ÓÓÅÏÈ¼¶3
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQÍ¨µÀÊ¹ÄÜ
 	NVIC_Init(&NVIC_InitStructure);	//¸ù¾ÝÖ¸¶¨µÄ²ÎÊý³õÊ¼»¯VIC¼Ä´æÆ÷
-	//TIM9
-//	NVIC_InitStructure.NVIC_IRQChannel = TIM1_BRK_TIM9_IRQn;
-//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=2;//ÇÀÕ¼ÓÅÏÈ¼¶3
-//	NVIC_InitStructure.NVIC_IRQChannelSubPriority =0;		//×ÓÓÅÏÈ¼¶3
-//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQÍ¨µÀÊ¹ÄÜ
-//	NVIC_Init(&NVIC_InitStructure);	//¸ù¾ÝÖ¸¶¨µÄ²ÎÊý³õÊ¼»¯VIC¼Ä´æÆ÷¢
+	//TIM2
+	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=1;//ÇÀÕ¼ÓÅÏÈ¼¶3
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority =0;		//×ÓÓÅÏÈ¼¶3
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			//IRQÍ¨µÀÊ¹ÄÜ
+	NVIC_Init(&NVIC_InitStructure);	//¸ù¾ÝÖ¸¶¨µÄ²ÎÊý³õÊ¼»¯VIC¼Ä´æÆ÷¢
 //???????
 
 
@@ -60,9 +64,9 @@ void TIM_Cap_Init(u32 arr,u16 psc)
 	//TIM5
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5,ENABLE);  	//TIMÊ±ÖÓÊ¹ÄÜ 
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE); 	//Ê¹ÄÜPORTAÊ±ÖÓ	
-	//TIM9
-//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM9,ENABLE);
-//	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);	//Ê¹ÄÜPORTEÊ±ÖÓ	
+	//TIM2
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);	//Ê¹ÄÜPORTEÊ±ÖÓ	
  
 	/* GPIO³õÊ¼»¯*/
 	//TIM5-GPIOA
@@ -73,10 +77,10 @@ void TIM_Cap_Init(u32 arr,u16 psc)
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN; //ÏÂÀ­
 	GPIO_Init(GPIOA,&GPIO_InitStructure); //³õÊ¼»¯PA0
 
-	// TIM9-GPIOE
-//	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_6; //GPIOE5,6
-//	GPIO_Init(GPIOE,&GPIO_InitStructure); //³õÊ¼»¯PE
-//	GPIO_PinAFConfig(GPIOE,GPIO_PinSource5|GPIO_PinSource6,GPIO_AF_TIM9); //PA0¸´ÓÃÎ»¶¨Ê±Æ÷5
+	// TIM2-GPIOB
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3|GPIO_Pin_10|GPIO_Pin_11; //GPIOB 3,10,11
+	GPIO_Init(GPIOB,&GPIO_InitStructure); //³õÊ¼»¯PB
+
 //	
 	/*Òý½Å¸´ÓÃÓ³Éä*/
 	//PA0~3¸´ÓÃÎ»¶¨Ê±Æ÷5
@@ -85,8 +89,10 @@ void TIM_Cap_Init(u32 arr,u16 psc)
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource2,GPIO_AF_TIM5); //
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource3,GPIO_AF_TIM5); //
 	//PE5~6¸´ÓÃÎ»¶¨Ê±Æ÷9
-//	GPIO_PinAFConfig(GPIOE,GPIO_PinSource5,GPIO_AF_TIM9); //
-//	GPIO_PinAFConfig(GPIOE,GPIO_PinSource6,GPIO_AF_TIM9); //
+	GPIO_PinAFConfig(GPIOB,GPIO_PinSource3,GPIO_AF_TIM2); //
+	GPIO_PinAFConfig(GPIOB,GPIO_PinSource10,GPIO_AF_TIM2); //
+	GPIO_PinAFConfig(GPIOB,GPIO_PinSource11,GPIO_AF_TIM2); //
+	//GPIO_PinAFConfig(GPIOE,GPIO_PinSource10,GPIO_AF_TIM2); //
 	
   /*TIM³õÊ¼»¯  */
 	//TIM5
@@ -95,53 +101,66 @@ void TIM_Cap_Init(u32 arr,u16 psc)
 	TIM_TimeBaseStructure.TIM_Period=arr;   //×Ô¶¯ÖØ×°ÔØÖµ
 	TIM_TimeBaseStructure.TIM_ClockDivision=TIM_CKD_DIV1; 
 	TIM_TimeBaseInit(TIM5,&TIM_TimeBaseStructure);
-	//TIM9
-//	TIM_TimeBaseInit(TIM9,&TIM_TimeBaseStructure);
+	//TIM2
+	TIM_TimeBaseInit(TIM2,&TIM_TimeBaseStructure);
 	
 	/*²¶»ñ²ÎÊýÉèÖÃ*/
 	//³õÊ¼»¯TIM5ÊäÈë²¶»ñ²ÎÊý
-	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_1; //CC1S=01 	Ñ¡ÔñÊäÈë¶Ë IC1Ó³Éäµ½TI1ÉÏ
-  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//ÉÏÉýÑØ²¶»ñ
-  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //Ó³Éäµ½TI1ÉÏ
-  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //ÅäÖÃÊäÈë·ÖÆµ,²»·ÖÆµ 
-  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ÅäÖÃÊäÈëÂË²¨Æ÷ ²»ÂË²¨
-	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-	
-	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_2; //CC1S=01 	Ñ¡ÔñÊäÈë¶Ë IC1Ó³Éäµ½TI1ÉÏ
-  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//ÉÏÉýÑØ²¶»ñ
-  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //Ó³Éäµ½TI1ÉÏ
-  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //ÅäÖÃÊäÈë·ÖÆµ,²»·ÖÆµ 
-  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ÅäÖÃÊäÈëÂË²¨Æ÷ ²»ÂË²¨
-	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-	
-	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_3; //CC1S=01 	Ñ¡ÔñÊäÈë¶Ë IC1Ó³Éäµ½TI1ÉÏ
-  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//ÉÏÉýÑØ²¶»ñ
-  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //Ó³Éäµ½TI1ÉÏ
-  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //ÅäÖÃÊäÈë·ÖÆµ,²»·ÖÆµ 
-  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ÅäÖÃÊäÈëÂË²¨Æ÷ ²»ÂË²¨
-	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-	
-	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_4; //CC1S=01 	Ñ¡ÔñÊäÈë¶Ë IC1Ó³Éäµ½TI1ÉÏ
-  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//ÉÏÉýÑØ²¶»ñ
-  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //Ó³Éäµ½TI1ÉÏ
-  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //ÅäÖÃÊäÈë·ÖÆµ,²»·ÖÆµ 
-  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ÅäÖÃÊäÈëÂË²¨Æ÷ ²»ÂË²¨
-	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
+//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_1; //CC1S=01 	Ñ¡ÔñÊäÈë¶Ë IC1Ó³Éäµ½TI1ÉÏ
+//  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//ÉÏÉýÑØ²¶»ñ
+//  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //Ó³Éäµ½TI1ÉÏ
+//  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //ÅäÖÃÊäÈë·ÖÆµ,²»·ÖÆµ 
+//  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ÅäÖÃÊäÈëÂË²¨Æ÷ ²»ÂË²¨
+//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
+//	
+//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_2; //CC1S=01 	Ñ¡ÔñÊäÈë¶Ë IC1Ó³Éäµ½TI1ÉÏ
+//  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//ÉÏÉýÑØ²¶»ñ
+//  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //Ó³Éäµ½TI1ÉÏ
+//  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //ÅäÖÃÊäÈë·ÖÆµ,²»·ÖÆµ 
+//  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ÅäÖÃÊäÈëÂË²¨Æ÷ ²»ÂË²¨
+//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
+//	
+//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_3; //CC1S=01 	Ñ¡ÔñÊäÈë¶Ë IC1Ó³Éäµ½TI1ÉÏ
+//  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//ÉÏÉýÑØ²¶»ñ
+//  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //Ó³Éäµ½TI1ÉÏ
+//  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //ÅäÖÃÊäÈë·ÖÆµ,²»·ÖÆµ 
+//  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ÅäÖÃÊäÈëÂË²¨Æ÷ ²»ÂË²¨
+//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
+//	
+//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_4; //CC1S=01 	Ñ¡ÔñÊäÈë¶Ë IC1Ó³Éäµ½TI1ÉÏ
+//  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//ÉÏÉýÑØ²¶»ñ
+//  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //Ó³Éäµ½TI1ÉÏ
+//  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //ÅäÖÃÊäÈë·ÖÆµ,²»·ÖÆµ 
+//  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ÅäÖÃÊäÈëÂË²¨Æ÷ ²»ÂË²¨
+//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
 	
 	//TIM5 µÄ4¸öÍ¨µÀ
-//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_1; //CC1S=01 	Ñ¡ÔñÊäÈë¶Ë IC1Ó³Éäµ½TI1ÉÏ
-//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_2; 
-//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_3; 
-//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_4; 
-//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-	//TIM9µÄ2¸öÍ¨µÀ
-//	TIM9_ICInitStructure.TIM_Channel = TIM_Channel_1; 
-//	TIM_ICInit(TIM9, &TIM9_ICInitStructure);
-//	TIM9_ICInitStructure.TIM_Channel = TIM_Channel_2; 
-//	TIM_ICInit(TIM9, &TIM9_ICInitStructure);
+	TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//ÉÏÉýÑØ²¶»ñ
+  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //Ó³Éäµ½TI1ÉÏ
+  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //ÅäÖÃÊäÈë·ÖÆµ,²»·ÖÆµ 
+  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ÅäÖÃÊäÈëÂË²¨Æ÷ ²»ÂË²¨
+	
+	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_1; //CC1S=01 	Ñ¡ÔñÊäÈë¶Ë IC1Ó³Éäµ½TI1ÉÏ
+	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
+	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_2; 
+	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
+	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_3; 
+	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
+	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_4; 
+	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
+	//TIM2µÄ3¸öÍ¨µÀ
+	TIM2_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//ÉÏÉýÑØ²¶»ñ
+  TIM2_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //Ó³Éäµ½TI1ÉÏ
+  TIM2_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //ÅäÖÃÊäÈë·ÖÆµ,²»·ÖÆµ 
+  TIM2_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 ÅäÖÃÊäÈëÂË²¨Æ÷ ²»ÂË²¨
+//	TIM2_ICInitStructure.TIM_Channel = TIM_Channel_1; 
+//	TIM_ICInit(TIM2, &TIM2_ICInitStructure);
+	TIM2_ICInitStructure.TIM_Channel = TIM_Channel_2; 
+	TIM_ICInit(TIM2, &TIM2_ICInitStructure);
+	TIM2_ICInitStructure.TIM_Channel = TIM_Channel_3; 
+	TIM_ICInit(TIM2, &TIM2_ICInitStructure);
+	TIM2_ICInitStructure.TIM_Channel = TIM_Channel_4; 
+	TIM_ICInit(TIM2, &TIM2_ICInitStructure);
 	// ÔÊÐí²¶»ñÖÐ¶Ï
 	//TIM5
 	//TIM_ITConfig(TIM5,TIM_IT_Update|TIM_IT_CC1,ENABLE);//ÔÊÐí¸üÐÂÖÐ¶Ï ,ÔÊÐíCC1IE²¶»ñÖÐ¶Ï	
@@ -150,14 +169,14 @@ void TIM_Cap_Init(u32 arr,u16 psc)
 	//	TIM_ITConfig(TIM5,TIM_IT_CC2,ENABLE);
 //	TIM_ITConfig(TIM5,TIM_IT_CC3,ENABLE);
 //	TIM_ITConfig(TIM5,TIM_IT_CC4,ENABLE);
-	//TIM9
-//	TIM_ITConfig(TIM9,TIM_IT_Update|TIM_IT_CC1,ENABLE);
+	//TIM2
+		TIM_ITConfig(TIM2,TIM_IT_Update | TIM_IT_CC2| TIM_IT_CC3 | TIM_IT_CC4,ENABLE);
 //	TIM_ITConfig(TIM9,TIM_IT_Update|TIM_IT_CC2,ENABLE);
 	
 	/*Ê¹ÄÜ¶¨Ê±Æ÷*/
   TIM_Cmd(TIM5,ENABLE ); 	//Ê¹ÄÜ¶¨Ê±Æ÷5
 	
-//	TIM_Cmd(TIM9,ENABLE );
+	TIM_Cmd(TIM2,ENABLE );
 
 	
 }
@@ -182,10 +201,13 @@ void ChannelSet(void)
 	TIM5CH3.TIM_IT_CCX = TIM_IT_CC3;
 	TIM5CH4.TIM_IT_CCX = TIM_IT_CC4;
 	//
-	TIMX.timX = TIM9;
-	TIM9CH1=TIM9CH2=TIMX;
-	TIM9CH1.TIM_IT_CCX = TIM_IT_CC1;
-	TIM9CH2.TIM_IT_CCX = TIM_IT_CC2; // ×¢£ºTIM9ÎÞCH3ºÍCH4
+	TIMX.timX = TIM2;
+	TIM2CH4=TIM2CH3=TIM2CH2=TIM2CH1=TIMX;
+	TIM2CH1.TIM_IT_CCX = TIM_IT_CC1;
+	TIM2CH2.TIM_IT_CCX = TIM_IT_CC2; 
+	TIM2CH3.TIM_IT_CCX = TIM_IT_CC3;
+	TIM2CH4.TIM_IT_CCX = TIM_IT_CC4; 
+	
 
 }
 
@@ -254,7 +276,7 @@ void SingleChannelHandler(TIM_CAPTURE * tch )
 				TIM_Cmd(tch->timX,DISABLE ); 	//¹Ø±Õ¶¨Ê±Æ÷
 	 			TIM_SetCounter(tch->timX,0);
 				
-				//printf(" tch->CAPTURE_STA = %d ",tch->CAPTURE_STA); //´òÓ¡×ÜµÄ¸ßµãÆ½Ê±¼ä
+//				printf(" tch->CAPTURE_STA = %d ",tch->CAPTURE_STA); //´òÓ¡×ÜµÄ¸ßµãÆ½Ê±¼ä
 	 			//TIM_OC1PolarityConfig(tch->timX,TIM_ICPolarity_Falling);		//CC1P=1 ÉèÖÃÎªÏÂ½µÑØ²¶»ñ
 				switch( tch->TIM_IT_CCX )
 				{
@@ -323,6 +345,43 @@ void TIM5_IRQHandler(void)
 		 
 	 }
 
+}
+
+void TIM2_IRQHandler(void)
+{
+	//	status = TIM_GetITStatus(TIM5, TIM_IT_CC1 );
+//	printf(" TIM_GetITStatus1 = %d ",status); //´òÓ¡×ÜµÄ¸ßµãÆ½Ê±¼ä
+//	status = TIM_GetITStatus(TIM2, TIM_IT_CC2 );
+//	printf(" TIM2_GetITStatus2 = %d ",status); //´òÓ¡×ÜµÄ¸ßµãÆ½Ê±¼ä
+//	status = TIM_GetITStatus(TIM2, TIM_IT_CC3 );
+//	printf(" TIM2_GetITStatus3 = %d ",status); //´òÓ¡×ÜµÄ¸ßµãÆ½Ê±¼ä
+//	status = TIM_GetITStatus(TIM2, TIM_IT_CC4 );
+//	printf(" TIM2_GetITStatus4 = %d ",status); //´òÓ¡×ÜµÄ¸ßµãÆ½Ê±¼ä
+//	status = TIM_GetITStatus(TIM2, TIM_IT_Update );
+//	printf(" TIM2_GetITStatus5 = %d ",status); //´òÓ¡×ÜµÄ¸ßµãÆ½Ê±¼ä
+	
+	 TIM_ClearITPendingBit(TIM2, TIM_IT_Update); //Çå³ýÖÐ¶Ï±êÖ¾Î»
+	if(TIM_GetITStatus(TIM2, TIM_IT_CC2) != RESET) 
+   {								  
+     
+	     
+		  SingleChannelHandler( &TIM2CH2);
+		 
+	 }
+	 	if(TIM_GetITStatus(TIM2, TIM_IT_CC3) !=RESET) 
+   {								  
+     
+		  SingleChannelHandler( &TIM2CH3);
+		 
+	 }
+	 	if(TIM_GetITStatus(TIM2, TIM_IT_CC4) !=RESET) 
+   {								  
+     
+		  SingleChannelHandler( &TIM2CH4);
+		 
+	 }
+
+	
 }
 
 //void TIM1_BRK_TIM9_IRQHandler(void)

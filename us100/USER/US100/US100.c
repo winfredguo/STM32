@@ -40,9 +40,9 @@ void US100IO_Init(void)
 
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);//使能GPIOG时钟
 
-  //PG3、PG4
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;         //ECHO 对应IO口
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;                  //普通输出模式
+  //PG3,4,5
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5;         //TRIG 对应IO口
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;                  //普通输出模式
   GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;                 //推挽输出
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;             //100MHz
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;                   //上拉
@@ -50,10 +50,13 @@ void US100IO_Init(void)
 	
 	//GPIO_SetBits(GPIOE, GPIO_Pin_3 | GPIO_Pin_4);   
 	
-	 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3 ;   //TRIG
-	 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; 
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11|GPIO_Pin_12|GPIO_Pin_13;         //TRIG 对应IO口
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;                  //普通输出模式
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;                 //推挽输出
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;             //100MHz
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;                   //上拉
 
-	 GPIO_Init(GPIOG, &GPIO_InitStructure); 
+	 GPIO_Init(GPIOD, &GPIO_InitStructure); 
   // GPIO_SetBits(GPIOG, GPIO_Pin_9);
 	
 	

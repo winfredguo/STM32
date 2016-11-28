@@ -18,7 +18,8 @@ int CalDistance(TIM_CAPTURE *tch );
  
  
 extern TIM_CAPTURE TIM5CH1,TIM5CH2,TIM5CH3,TIM5CH4;
-extern TIM_CAPTURE TIM9CH1,TIM9CH2;
+//extern TIM_CAPTURE TIM9CH1,TIM9CH2;
+extern TIM_CAPTURE TIM2CH1,TIM2CH2,TIM2CH3,TIM2CH4;
 
 int main(void)
 { 
@@ -53,19 +54,27 @@ int main(void)
 		U1_TRIGPin =0;
 		distance = CalDistance( &TIM5CH1);
 		printf("US100_1 distance=%d mm \n", distance); //打印总的高点平时间
-		
-//			// set trig 
+//		
+////			// set trig 
 		U2_TRIGPin =1;
 		delay_us(20);
 		U2_TRIGPin =0;
 		distance = CalDistance( &TIM5CH3);
 		printf("US100_2 distance=%d mm \n", distance); //打印总的高点平时间
-				
-		
+//		
+			U3_TRIGPin =1;
+			delay_us(20);
+			U3_TRIGPin =0;
+			distance = CalDistance( &TIM2CH3);
+			printf("US100_3 distance=%d mm \n", distance); //打印总的高点平时间
 
-		
-	
-	
+//			U4_TRIGPin =1;
+//			delay_us(20);
+//			U4_TRIGPin =0;
+//			distance = CalDistance( &TIM2CH4);
+//			printf("US100_4 distance=%d mm \n", distance); //打印总的高点平时间
+				
+
 	}
 }
 
