@@ -6,19 +6,21 @@
 /****************************************************************************
 * 名    称: TIM_Cap_Init(u32 arr,u16 psc)
 * 功    能 ：5路 捕获配置 
-						TIM5 CH1~CH4对应引脚：PA0,PA2,PA3
-						TIM9 CH1~CH2对应引脚: PE5,PE6
-						
+						TIM5 CH1~CH4对应引脚：PA0,PA1,PA2,PA3
 						TIM2 CH1~Ch4对应引脚：PA15,PB3，PB10,PB11
 						注：TIM5的CH2被占用，打开后频繁进入中断，故不用
-						1#US100
+						
 						
 * 入口参数：arr：自动重装值(TIM2,TIM5是32位的!!)
 						psc：时钟预分频数
 * 返回参数：无
 * 说    明：定时器溢出时间计算方法:Tout=((auto_data+1)*(fractional+1))/Ft us  
-* 配置：1# US100 ECHO：PA0， TRIG:PG3
-
+* 配置：1# US100 ECHO：PA0，  TRIG:PG3
+				2# US100 ECHO：PA2，  TRIG:PG4
+				3# US100 ECHO：PB3，  TRIG:PG5
+				4# US100 ECHO：PB10， TRIG:PD11
+				5# US100 ECHO：PB11， TRIG:PD12
+				
 ****************************************************************************/
 void ChannelSet(void);
 int status;
@@ -70,7 +72,7 @@ void TIM_Cap_Init(u32 arr,u16 psc)
  
 	/* GPIO初始化*/
 	//TIM5-GPIOA
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3; //GPIOA0~3
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_15|GPIO_Pin_2|GPIO_Pin_3; //GPIOA0~3
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;//复用功能
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;	//速度100MHz
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP; //推挽复用输出
@@ -85,14 +87,14 @@ void TIM_Cap_Init(u32 arr,u16 psc)
 	/*引脚复用映射*/
 	//PA0~3复用位定时器5
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource0,GPIO_AF_TIM5); //
-	GPIO_PinAFConfig(GPIOA,GPIO_PinSource1,GPIO_AF_TIM5); //
+	GPIO_PinAFConfig(GPIOA,GPIO_PinSource15,GPIO_AF_TIM5); //
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource2,GPIO_AF_TIM5); //
 	GPIO_PinAFConfig(GPIOA,GPIO_PinSource3,GPIO_AF_TIM5); //
-	//PE5~6复用位定时器9
+	//PE5~6复用位定时器2
 	GPIO_PinAFConfig(GPIOB,GPIO_PinSource3,GPIO_AF_TIM2); //
 	GPIO_PinAFConfig(GPIOB,GPIO_PinSource10,GPIO_AF_TIM2); //
 	GPIO_PinAFConfig(GPIOB,GPIO_PinSource11,GPIO_AF_TIM2); //
-	//GPIO_PinAFConfig(GPIOE,GPIO_PinSource10,GPIO_AF_TIM2); //
+
 	
   /*TIM初始化  */
 	//TIM5
@@ -106,34 +108,6 @@ void TIM_Cap_Init(u32 arr,u16 psc)
 	
 	/*捕获参数设置*/
 	//初始化TIM5输入捕获参数
-//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_1; //CC1S=01 	选择输入端 IC1映射到TI1上
-//  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//上升沿捕获
-//  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //映射到TI1上
-//  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //配置输入分频,不分频 
-//  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 配置输入滤波器 不滤波
-//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-//	
-//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_2; //CC1S=01 	选择输入端 IC1映射到TI1上
-//  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//上升沿捕获
-//  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //映射到TI1上
-//  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //配置输入分频,不分频 
-//  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 配置输入滤波器 不滤波
-//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-//	
-//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_3; //CC1S=01 	选择输入端 IC1映射到TI1上
-//  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//上升沿捕获
-//  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //映射到TI1上
-//  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //配置输入分频,不分频 
-//  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 配置输入滤波器 不滤波
-//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-//	
-//	TIM5_ICInitStructure.TIM_Channel = TIM_Channel_4; //CC1S=01 	选择输入端 IC1映射到TI1上
-//  TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//上升沿捕获
-//  TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //映射到TI1上
-//  TIM5_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	 //配置输入分频,不分频 
-//  TIM5_ICInitStructure.TIM_ICFilter = 0x00;//IC1F=0000 配置输入滤波器 不滤波
-//	TIM_ICInit(TIM5, &TIM5_ICInitStructure);
-	
 	//TIM5 的4个通道
 	TIM5_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;	//上升沿捕获
   TIM5_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI; //映射到TI1上
@@ -161,17 +135,11 @@ void TIM_Cap_Init(u32 arr,u16 psc)
 	TIM_ICInit(TIM2, &TIM2_ICInitStructure);
 	TIM2_ICInitStructure.TIM_Channel = TIM_Channel_4; 
 	TIM_ICInit(TIM2, &TIM2_ICInitStructure);
-	// 允许捕获中断
-	//TIM5
-	//TIM_ITConfig(TIM5,TIM_IT_Update|TIM_IT_CC1,ENABLE);//允许更新中断 ,允许CC1IE捕获中断	
-	//	TIM_ITConfig(TIM5,TIM_IT_Update,ENABLE);//允许更新中断 ,允许CC1IE捕获中断	
-		TIM_ITConfig(TIM5, TIM_IT_CC1  | TIM_IT_CC3 | TIM_IT_CC4  |TIM_IT_Update,ENABLE);//允许更新中断 ,允许CC1IE捕获中断	
-	//	TIM_ITConfig(TIM5,TIM_IT_CC2,ENABLE);
-//	TIM_ITConfig(TIM5,TIM_IT_CC3,ENABLE);
-//	TIM_ITConfig(TIM5,TIM_IT_CC4,ENABLE);
-	//TIM2
+	// 允许捕获中断 用到的通道允许中断
+		TIM_ITConfig(TIM5, TIM_IT_CC1  | TIM_IT_CC3   |TIM_IT_Update,ENABLE);//允许更新中断 ,允许CC1IE捕获中断	
+	
 		TIM_ITConfig(TIM2,TIM_IT_Update | TIM_IT_CC2| TIM_IT_CC3 | TIM_IT_CC4,ENABLE);
-//	TIM_ITConfig(TIM9,TIM_IT_Update|TIM_IT_CC2,ENABLE);
+
 	
 	/*使能定时器*/
   TIM_Cmd(TIM5,ENABLE ); 	//使能定时器5
@@ -281,16 +249,16 @@ void SingleChannelHandler(TIM_CAPTURE * tch )
 				switch( tch->TIM_IT_CCX )
 				{
 					case TIM_IT_CC1:
-						TIM_OC1PolarityConfig(tch->timX,TIM_ICPolarity_Falling); //CC1P=0 设置为上升沿捕获
+						TIM_OC1PolarityConfig(tch->timX,TIM_ICPolarity_Falling); //CC1P=0 设置为下降沿捕获
 						break;
 					case TIM_IT_CC2:
-						TIM_OC2PolarityConfig(tch->timX,TIM_ICPolarity_Falling); //CC1P=0 设置为上升沿捕获
+						TIM_OC2PolarityConfig(tch->timX,TIM_ICPolarity_Falling); //CC1P=0 设置为下降沿捕获
 						break;
 					case TIM_IT_CC3:
-						TIM_OC3PolarityConfig(tch->timX,TIM_ICPolarity_Falling); //CC1P=0 设置为上升沿捕获
+						TIM_OC3PolarityConfig(tch->timX,TIM_ICPolarity_Falling); //CC1P=0 设置为下降沿捕获
 						break;
 					case TIM_IT_CC4:
-						TIM_OC4PolarityConfig(tch->timX,TIM_ICPolarity_Falling); //CC1P=0 设置为上升沿捕获
+						TIM_OC4PolarityConfig(tch->timX,TIM_ICPolarity_Falling); //CC1P=0 设置为下降沿捕获
 						break;
 					default:
 						break;
@@ -325,26 +293,13 @@ void TIM5_IRQHandler(void)
 //	
 	TIM_ClearITPendingBit(TIM5, TIM_IT_Update); //清除中断标志位
 	if(TIM_GetITStatus(TIM5, TIM_IT_CC1) != RESET) 
-   {								  
-     
-		 /* Clear TIM3 Capture compare interrupt pending bit */
-     
+   {								       
 		  SingleChannelHandler( &TIM5CH1);
-		 
 	 }
-	 	if(TIM_GetITStatus(TIM5, TIM_IT_CC3) !=RESET) 
-   {								  
-     
-		  SingleChannelHandler( &TIM5CH3);
-		 
+		if(TIM_GetITStatus(TIM5, TIM_IT_CC3) !=RESET) 
+	 {								   
+			SingleChannelHandler( &TIM5CH3); 
 	 }
-	 	if(TIM_GetITStatus(TIM5, TIM_IT_CC4) !=RESET) 
-   {								  
-     
-		  SingleChannelHandler( &TIM5CH4);
-		 
-	 }
-
 }
 
 void TIM2_IRQHandler(void)
